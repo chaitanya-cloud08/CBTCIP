@@ -1,74 +1,40 @@
-const container=document.querySelector('.container');
-const search=document.querySelector('.search-box button');
-const weatherBox=document.querySelector('.weather-box');
-const weatherDetails=document.querySelector('.weather-details');
-const error404= document.querySelector('.not-found')
-search.addEventListener('click',()=> {
-const APIKey = '1a81005c9eb51ce03c81b8ba8ced76a2';
-const city = document.querySelector('.search-box input').value
+const url =
+    'https://api.openweathermap.org/data/2.5/weather';
+const apiKey =
+    '3c75e4d28f6a4004a1c9a4456853fe90';
 
-if(city=='')
-return;
+// $(document).ready(function () {
+//     // weatherFn('Pune');
+// });
 
-fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${APIKey}`).then(response => response.json()).then(json => {
-    
-   if(json.cod == '404')
-   {
-    container.style.height = '400px';
-    error404.classList.remove('active');
-    weatherDetails.classList.remove('active');
-    weatherBox.classList.add('active');
-    return;
-   }
+async function weatherFn(cName) {
+    const temp =
+        `${url}?q=${cName}&appid=${apiKey}&units=metric`;
+    try {
+        const res = await fetch(temp);
+        const data = await res.json();
+        if (res.ok) {
+            weatherShowFn(data);
+        } else {
+            alert('City not found. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error fetching weather data:', error);
+    }
+}
 
-   container.style.height='555px';
-   weatherBox.classList.add('active')
-   weatherDetails.classList.add('active')
-   error404.classList.remove('active');
-    const image= document.querySelector('.weather-box img')
-    const temperature= document.querySelector('.weather-box .temperature')
-    const description= document.querySelector('.weather-box .description')
-    const humidity= document.querySelector('.weather-details .humidity span')
-    const wind= document.querySelector('.weather-box .wind span')
-
-    switch(json.weather[0].main)
-    {
-        case 'Clear':
-            image.src='images/clear.png'
-            break;
-
-            case 'Rain':
-            image.src='images/rain.png'
-            break;
-
-            case 'Snow':
-            image.src='images/snow.png'
-            break;
-
-
-            case 'Mist':
-            image.src='images/mist.png'
-            break;
-
-            case 'Clouds':
-            image.src='images/cloud.png'
-            break;
-
-            case 'Haze':
-            image.src='images/mist.png'
-            break;
-
-
-            default:
-                image.src='images/cloud.png';
-                break;
-         }
-
-    temperature.innerHTML = `${parseInt(json.main.temp)}<span>°C</span>`;
-    description.innerHTML = `${json.weather[0].description}`;
-    humidity.innerHTML = `${json.main.humidity}`;
-    wind.innerHTML = `${parseInt(json.main.wind)}Km/h`;
-
-})
-
-});
+function weatherShowFn(data) {
+    $('#city-name').text(data.name);
+    $('#date').text(moment().
+        format('MMMM Do YYYY, h:mm:ss a'));
+    $('#temperature').
+        html(`${data.main.temp}°C`);
+    $('#description').
+        text(data.weather[0].description);
+    $('#wind-speed').
+        html(`Wind Speed: ${data.wind.speed} m/s`);
+    $('#weather-icon').
+        attr('src',
+            `cloud.png`);
+    $('#weather-info').fadeIn();
+}
